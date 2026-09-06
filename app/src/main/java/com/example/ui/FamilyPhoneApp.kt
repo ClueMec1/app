@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +29,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.data.model.UserProfile
 import com.example.service.CallState
 import com.example.ui.components.CallScreen
 import com.example.ui.components.IncomingCallOverlay
@@ -81,7 +84,8 @@ fun FamilyPhoneApp(
     var targetChatId by remember { mutableStateOf("neumai") }
     var showEditProfileDialog by remember { mutableStateOf(false) }
 
-    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
+    val rawUserProfile by viewModel.userProfile.collectAsStateWithLifecycle()
+    val userProfile = rawUserProfile ?: UserProfile()
     val contacts by viewModel.contacts.collectAsStateWithLifecycle()
     val groups by viewModel.groups.collectAsStateWithLifecycle()
     val messages by viewModel.messages.collectAsStateWithLifecycle()
@@ -165,6 +169,7 @@ fun FamilyPhoneApp(
                     AppTab.PHONE -> DialerScreen(
                         userProfile = userProfile,
                         contacts = contacts,
+                        groups = groups,
                         onStartCall = { name, number, role, avatar ->
                             viewModel.startCall(context, name, number, role, avatar)
                         },
@@ -178,6 +183,9 @@ fun FamilyPhoneApp(
                         onNavigateToNeumai = {
                             targetChatId = "neumai"
                             currentTab = AppTab.CHAT
+                        },
+                        onNavigateToContacts = {
+                            currentTab = AppTab.CONTACTS
                         },
                         onOpenProfileSettings = {
                             showEditProfileDialog = true
@@ -242,8 +250,8 @@ fun FamilyPhoneApp(
 
             // Edit Profile (Your Name & Number) Dialog
             if (showEditProfileDialog) {
-                var editName by remember { mutableStateOf(userProfile.name) }
-                var editNumber by remember { mutableStateOf(userProfile.familyNumber) }
+                var editName by remember(userProfile.name) { mutableStateOf(userProfile.name) }
+                var editNumber by remember(userProfile.familyNumber) { mutableStateOf(userProfile.familyNumber) }
 
                 AlertDialog(
                     onDismissRequest = { showEditProfileDialog = false },
@@ -265,9 +273,22 @@ fun FamilyPhoneApp(
                                 value = editNumber,
                                 onValueChange = { editNumber = it },
                                 label = { Text("Your Family Wi-Fi Number") },
-                                placeholder = { Text("+88-0421") },
+                                placeholder = { Text("e.g. +88-0101") },
                                 modifier = Modifier.fillMaxWidth()
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel.clearAllData()
+                                    showEditProfileDialog = false
+                                },
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = Color(0xFFDC2626)
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Reset All App Data", fontSize = 13.sp)
+                            }
                         }
                     },
                     confirmButton = {

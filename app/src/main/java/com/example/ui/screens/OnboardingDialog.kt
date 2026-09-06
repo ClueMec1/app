@@ -129,7 +129,7 @@ fun OnboardingDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Your Name") },
-                    placeholder = { Text("e.g. Elias") },
+                    placeholder = { Text("e.g. Alex") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -137,7 +137,7 @@ fun OnboardingDialog(
                     value = familyNumber,
                     onValueChange = { familyNumber = it },
                     label = { Text("Choose Your Family Number") },
-                    placeholder = { Text("+88-0421 or any digits") },
+                    placeholder = { Text("e.g. +88-0101 or 101") },
                     modifier = Modifier.fillMaxWidth()
                 )
 

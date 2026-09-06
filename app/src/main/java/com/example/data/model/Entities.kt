@@ -6,13 +6,13 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "user_profile")
 data class UserProfile(
     @PrimaryKey val id: Int = 1,
-    val name: String = "Elias Miller",
-    val familyNumber: String = "+88-0421",
-    val avatarSeed: String = "Elias",
+    val name: String = "",
+    val familyNumber: String = "",
+    val avatarSeed: String = "",
     val fatherName: String = "",
     val motherName: String = "",
     val siblings: String = "",
-    val isInitialized: Boolean = true
+    val isInitialized: Boolean = false
 )
 
 @Entity(tableName = "neumai_memories")

@@ -126,15 +126,21 @@ fun ChatScreen(
 
     val activeMessages = messages.filter { it.conversationId == selectedConversationId }
 
-    val neumaiQuickPrompts = listOf(
-        "🧠 What do you know?",
-        "🎂 When is Sarah's birthday?",
-        "🔑 What's the Wi-Fi password?",
-        "⚠️ What is Noah allergic to?",
-        "📅 When is Sunday BBQ?",
-        "☕ What does Dad like to drink?",
-        "Remember that Grandma Evelyn loves lavender tea"
-    )
+    val neumaiQuickPrompts = remember(neumaiMemories) {
+        val list = mutableListOf(
+            "🧠 What do you remember?",
+            "💡 How do family memories work?"
+        )
+        for (mem in neumaiMemories.take(4)) {
+            list.add("Tell me about ${mem.keySubject}")
+        }
+        if (neumaiMemories.isEmpty()) {
+            list.add("📝 Remember that Mom's birthday is...")
+            list.add("🔑 Remember our Wi-Fi password is...")
+            list.add("📅 Remember family dinner is at 6 PM")
+        }
+        list
+    }
 
     val standardQuickPhrases = listOf(
         "I'm on Wi-Fi!",
@@ -919,13 +925,13 @@ private fun MemoryVaultDialog(
                         OutlinedTextField(
                             value = newSubject,
                             onValueChange = { newSubject = it },
-                            placeholder = { Text("Subject (e.g. Sarah, Wi-Fi)", fontSize = 11.sp) },
+                            placeholder = { Text("Subject (e.g. Wi-Fi, Mom, Schedule)", fontSize = 11.sp) },
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
                             value = newFact,
                             onValueChange = { newFact = it },
-                            placeholder = { Text("Fact (e.g. Birthday is May 14)", fontSize = 11.sp) },
+                            placeholder = { Text("Fact (e.g. Password is HomeWiFi2025)", fontSize = 11.sp) },
                             modifier = Modifier.fillMaxWidth()
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

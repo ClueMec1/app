@@ -30,6 +30,9 @@ interface ContactDao {
     @Query("SELECT * FROM family_contacts ORDER BY name ASC")
     fun getAllContactsFlow(): Flow<List<FamilyContact>>
 
+    @Query("SELECT * FROM family_contacts ORDER BY name ASC")
+    suspend fun getAllContacts(): List<FamilyContact>
+
     @Query("SELECT * FROM family_contacts WHERE familyNumber = :number LIMIT 1")
     suspend fun getContactByNumber(number: String): FamilyContact?
 

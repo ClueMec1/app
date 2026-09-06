@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.FamilyContact
+import com.example.data.model.FamilyGroup
 import com.example.data.model.UserProfile
 import com.example.ui.components.BentoDialpad
 import com.example.ui.components.BentoQuickGrid
@@ -46,10 +47,12 @@ import com.example.ui.theme.BentoTextSecondary
 fun DialerScreen(
     userProfile: UserProfile,
     contacts: List<FamilyContact>,
+    groups: List<FamilyGroup> = emptyList(),
     onStartCall: (name: String, number: String, role: String, avatar: String) -> Unit,
     onSimulateIncomingCall: () -> Unit,
     onNavigateToGroupChat: () -> Unit,
     onNavigateToNeumai: () -> Unit,
+    onNavigateToContacts: () -> Unit = {},
     onOpenProfileSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -70,8 +73,7 @@ fun DialerScreen(
             .fillMaxSize()
             .background(BentoBackground)
     ) {
-        // Bento Header matching design:
-        // Elias Miller + Avatar + Family ID (+88-0421) + Settings
+        // Bento Header: Avatar + Name + Family ID + Settings
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,20 +90,20 @@ fun DialerScreen(
                     .padding(4.dp)
             ) {
                 FamilyAvatar(
-                    name = userProfile.name,
+                    name = if (userProfile.name.isNotBlank()) userProfile.name else "You",
                     seed = userProfile.avatarSeed,
                     size = 48.dp,
                     borderColor = BentoPrimary
                 )
                 Column {
                     Text(
-                        text = userProfile.name,
+                        text = if (userProfile.name.isNotBlank()) userProfile.name else "My Family Phone",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = BentoTextPrimary
                     )
                     Text(
-                        text = "${userProfile.familyNumber} (Family ID)",
+                        text = if (userProfile.familyNumber.isNotBlank()) "${userProfile.familyNumber} (Family ID)" else "Set your family number",
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         color = BentoTextSecondary
@@ -126,14 +128,16 @@ fun DialerScreen(
             }
         }
 
-        // Bento Quick Grid (Mother, Sunday BBQ, Dad, NEUMAI Family AI)
+        // Bento Quick Grid
         BentoQuickGrid(
             contacts = contacts,
+            groups = groups,
             onContactCall = { contact ->
                 onStartCall(contact.name, contact.familyNumber, contact.role, contact.avatarSeed)
             },
             onGroupClick = onNavigateToGroupChat,
-            onNeumaiClick = onNavigateToNeumai
+            onNeumaiClick = onNavigateToNeumai,
+            onAddContactClick = onNavigateToContacts
         )
 
         // Bento Dialpad Section

@@ -156,14 +156,14 @@ fun ContactsScreen(
                         value = newName,
                         onValueChange = { newName = it },
                         label = { Text("Full Name") },
-                        placeholder = { Text("e.g. Grandma Evelyn") },
+                        placeholder = { Text("e.g. Mom, Grandma, Alex") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = newNumber,
                         onValueChange = { newNumber = it },
                         label = { Text("Family Wi-Fi Number") },
-                        placeholder = { Text("+88-0205") },
+                        placeholder = { Text("e.g. +88-0102") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(

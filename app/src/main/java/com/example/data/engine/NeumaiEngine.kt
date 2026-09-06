@@ -176,12 +176,11 @@ object NeumaiEngine {
         val firstTwo = words.take(2).joinToString(" ").removeSuffix("'s")
         return when {
             fact.contains("wi-fi", ignoreCase = true) || fact.contains("wifi", ignoreCase = true) -> "Wi-Fi"
-            fact.contains("bbq", ignoreCase = true) -> "Sunday BBQ"
-            fact.contains("grandma", ignoreCase = true) -> "Grandma Evelyn"
-            fact.contains("mom", ignoreCase = true) || fact.contains("sarah", ignoreCase = true) -> "Sarah"
-            fact.contains("dad", ignoreCase = true) || fact.contains("david", ignoreCase = true) -> "David"
-            fact.contains("liam", ignoreCase = true) -> "Liam"
-            fact.contains("noah", ignoreCase = true) -> "Noah"
+            fact.contains("dinner", ignoreCase = true) -> "Dinner"
+            fact.contains("mom", ignoreCase = true) -> "Mom"
+            fact.contains("dad", ignoreCase = true) -> "Dad"
+            fact.contains("grandma", ignoreCase = true) -> "Grandma"
+            fact.contains("grandpa", ignoreCase = true) -> "Grandpa"
             else -> firstTwo.replaceFirstChar { it.uppercase() }
         }
     }

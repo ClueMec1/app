@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -27,12 +28,19 @@ class FamilyPhoneViewModel(application: Application) : AndroidViewModel(applicat
 
     private val db = AppDatabase.getInstance(application)
 
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            AppDatabase.ensureInitialData(db)
+        }
+    }
+
     val userProfile: StateFlow<UserProfile> = db.userProfileDao().getUserProfileFlow()
+        .map { it ?: UserProfile() }
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
             UserProfile()
-        ) as StateFlow<UserProfile>
+        )
 
     val contacts: StateFlow<List<FamilyContact>> = db.contactDao().getAllContactsFlow()
         .stateIn(
@@ -169,13 +177,27 @@ class FamilyPhoneViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun simulateIncomingCall(context: Context) {
-        val mother = contacts.value.firstOrNull { it.role.equals("Mother", ignoreCase = true) }
-            ?: contacts.value.firstOrNull()
-        val name = mother?.name ?: "Sarah Miller"
-        val number = mother?.familyNumber ?: "+88-0101"
-        val role = mother?.role ?: "Mother"
-        val avatar = mother?.avatarSeed ?: "Sarah"
+        val firstContact = contacts.value.firstOrNull()
+        val name = firstContact?.name ?: "Incoming Call"
+        val number = firstContact?.familyNumber ?: "+88-0100"
+        val role = firstContact?.role ?: "Family Wi-Fi"
+        val avatar = firstContact?.avatarSeed ?: "Caller"
         CallManager.triggerIncomingCall(context, name, number, role, avatar)
+    }
+
+    fun clearAllData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            db.clearAllTables()
+            db.userProfileDao().insertOrUpdate(
+                UserProfile(
+                    id = 1,
+                    name = "",
+                    familyNumber = "",
+                    avatarSeed = "",
+                    isInitialized = false
+                )
+            )
+        }
     }
 
     fun answerCall(context: Context) {

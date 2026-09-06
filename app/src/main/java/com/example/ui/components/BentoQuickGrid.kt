@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.FamilyContact
+import com.example.data.model.FamilyGroup
 import com.example.ui.theme.BentoCardBlue
 import com.example.ui.theme.BentoCardBlueText
 import com.example.ui.theme.BentoCardGreen
@@ -50,15 +52,17 @@ import com.example.ui.theme.BentoPrimary
 @Composable
 fun BentoQuickGrid(
     contacts: List<FamilyContact>,
+    groups: List<FamilyGroup> = emptyList(),
     onContactCall: (FamilyContact) -> Unit,
     onGroupClick: () -> Unit,
     onNeumaiClick: () -> Unit,
+    onAddContactClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val motherContact = contacts.firstOrNull { it.role.equals("Mother", ignoreCase = true) }
+    val topContact = contacts.firstOrNull { it.role.equals("Mother", ignoreCase = true) }
         ?: contacts.firstOrNull()
-    val dadContact = contacts.firstOrNull { it.role.equals("Father", ignoreCase = true) }
-        ?: contacts.getOrNull(1)
+    val secondContact = contacts.firstOrNull { it != topContact }
+    val groupName = groups.firstOrNull()?.name ?: "Family Chat"
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
@@ -77,14 +81,14 @@ fun BentoQuickGrid(
             .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Top 2-row Bento section: Left is Tall Card (Mother), Right is 2 stacked cards (Group & Dad)
+        // Top 2-row Bento section: Left is Tall Card (Mother/Contact), Right is 2 stacked cards (Group & Contact 2)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(130.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Card 1: Mother (Tall Card, col-span-1, row-span-2)
+            // Card 1: Primary Contact or Add Contact
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -92,7 +96,11 @@ fun BentoQuickGrid(
                     .clip(RoundedCornerShape(24.dp))
                     .background(BentoCardBlue)
                     .clickable {
-                        motherContact?.let { onContactCall(it) }
+                        if (topContact != null) {
+                            onContactCall(topContact)
+                        } else {
+                            onAddContactClick()
+                        }
                     }
                     .padding(12.dp)
             ) {
@@ -106,30 +114,39 @@ fun BentoQuickGrid(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = (motherContact?.role ?: "Mother").uppercase(),
+                            text = if (topContact != null) topContact.role.uppercase() else "DIRECTORY",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.8.sp,
                             color = BentoCardBlueText
                         )
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .scale(pulseScale)
-                                .clip(CircleShape)
-                                .background(Color(0xFF34A853))
-                        )
+                        if (topContact != null) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .scale(pulseScale)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF34A853))
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.PersonAdd,
+                                contentDescription = null,
+                                tint = BentoCardBlueText,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
 
                     Column {
                         Text(
-                            text = motherContact?.name ?: "Sarah",
+                            text = if (topContact != null) topContact.name else "Add Family",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = BentoCardBlueText
                         )
                         Text(
-                            text = motherContact?.statusText ?: "Online • Home",
+                            text = if (topContact != null) topContact.statusText else "Tap to add contact",
                             fontSize = 11.sp,
                             color = BentoCardBlueText.copy(alpha = 0.75f)
                         )
@@ -137,14 +154,14 @@ fun BentoQuickGrid(
                 }
             }
 
-            // Right column: Sunday BBQ + Dad
+            // Right column: Group + Contact 2
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Card 2: Sunday BBQ (Group)
+                // Card 2: Family Group
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -171,14 +188,15 @@ fun BentoQuickGrid(
                         )
                     }
                     Text(
-                        text = "Sunday BBQ",
+                        text = groupName,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = BentoCardPinkText
+                        color = BentoCardPinkText,
+                        maxLines = 1
                     )
                 }
 
-                // Card 3: Dad
+                // Card 3: Second Contact or Fast Dial
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -186,7 +204,13 @@ fun BentoQuickGrid(
                         .clip(RoundedCornerShape(20.dp))
                         .background(BentoCardGreen)
                         .clickable {
-                            dadContact?.let { onContactCall(it) }
+                            if (secondContact != null) {
+                                onContactCall(secondContact)
+                            } else if (topContact != null) {
+                                onContactCall(topContact)
+                            } else {
+                                onAddContactClick()
+                            }
                         }
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -197,7 +221,7 @@ fun BentoQuickGrid(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
-                            text = dadContact?.name?.split(" ")?.firstOrNull() ?: "Dad",
+                            text = secondContact?.name?.split(" ")?.firstOrNull() ?: if (contacts.isNotEmpty()) "Fast Dial" else "Wi-Fi Call",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = BentoCardGreenText
@@ -210,7 +234,7 @@ fun BentoQuickGrid(
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = if (dadContact?.isOnline == true) "In Call" else "Wi-Fi Ready",
+                            text = if (secondContact?.isOnline == true) "Online" else "Ready",
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Medium,
                             color = BentoCardGreenText.copy(alpha = 0.85f)
