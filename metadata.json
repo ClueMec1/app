@@ -1,0 +1,6 @@
+{
+  "name": "FamilyPhone",
+  "description": "App-to-app private family phone dialer and communicator with custom family numbers, Bento Grid quick actions, NEUMAI family AI assistant with persistent shared memory vault, group messaging, and call logs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
